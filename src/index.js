@@ -1,17 +1,55 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import './styles/index.css';
+import App from './components/App';
+
+import {
+    ApolloProvider, 
+    ApolloClient, 
+    HttpLink,
+    InMemoryCache,
+    gql,
+} from '@apollo/client'
+
+const client = new ApolloClient({
+  link: new HttpLink({
+    uri: 'http://localhost:5000/graphql',
+    // fetchOptions: {
+    //   mode: 'no-cors',
+    // },
+    // credentials: 'include',
+    // headers: {
+    //   'Content-Type': 'application/json'
+    // }
+  }),
+  cache: new InMemoryCache(),
+  connectToDevTools: true,
+  headers: {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Credentials': true,
+  },
+})
+
+const GET_ALL_MEMBERS = gql`{
+  allMembers {
+    nodes {
+      id
+      firstname
+      surname
+      address
+    }
+  }
+}
+`;
+
+client
+  .query({ query: GET_ALL_MEMBERS} )
+  .then(result => console.log(result));
 
 ReactDOM.render(
-  <React.StrictMode>
+  <ApolloProvider client={client}>
     <App />
-  </React.StrictMode>,
+  </ApolloProvider>,
   document.getElementById('root')
-);
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+)
